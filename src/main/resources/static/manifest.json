@@ -1,0 +1,43 @@
+{
+  "name": "Liga Web",
+  "short_name": "Liga Web",
+  "start_url": "landing.html",
+  "display": "fullscreen",
+  "background_color": "#efefef",
+  "theme_color": "#1d28ad",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/img/logoicon.png",
+      "type": "image/png", "sizes": "72x72"
+    },
+    {
+      "src": "/img/logoicon.png",
+      "type": "image/png", "sizes": "96x96"
+    },
+    {
+      "src": "/img/logoicon.png",
+      "type": "image/png","sizes": "128x128"
+    },
+    {
+      "src": "/img/logoicon.png",
+      "type": "image/png", "sizes": "144x144"
+    },
+    {
+      "src": "/img/logoicon.png",
+      "type": "image/png", "sizes": "152x152"
+    },
+    {
+      "src": "img/logoicon.png",
+      "type": "image/png", "sizes": "192x192"
+    },
+    {
+      "src": "/img/logoicon.png",
+      "type": "image/png", "sizes": "384x384"
+    },
+    {
+      "src": "/img/logoicon.png",
+      "type": "image/png", "sizes": "512x512"
+    }
+  ]
+}
