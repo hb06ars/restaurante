@@ -430,7 +430,6 @@ public class ControleController {
 	public ModelAndView finalizaVenda(Model model, Boolean finalizar, Integer numeroMesa, String pedidoVenda, String notaDataVenda, String valorTotalVenda, String vendas) { //Fun��o e alguns valores que recebe...
 		String link = verificaLink("/pages/home"); //Session
 		ModelAndView modelAndView = new ModelAndView(link); //JSP que ir� acessar.
-		
 		//Ocupando a mesa...
     	Mesa m = mesaDao.buscarCodigo(numeroMesa);
 		if(m == null)
