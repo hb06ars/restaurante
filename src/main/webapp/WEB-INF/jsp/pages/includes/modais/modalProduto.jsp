@@ -32,9 +32,9 @@ function modalEditarProduto(produtoID, codigo, descricao, preco, categoria, prec
 	document.getElementById("estoque").value = estoque;
 	document.getElementById("estoque").required = true;
 	document.getElementById("produtoID").value = produtoID;
-	document.getElementById("alterar").value = '1';
-	document.getElementById("salvar").value = '0';
-	document.getElementById("pesquisar").value = '0';
+	document.getElementById("alterarProduto").value = "1";
+	document.getElementById("salvarProduto").value = "0";
+	document.getElementById("pesquisarProduto").value = "0";
 	$("#modalEditarProduto").modal().show();
 }
 
@@ -56,9 +56,9 @@ function modalNovoProduto(){
 	document.getElementById("estoque").value = 0;
 	document.getElementById("estoque").readOnly = false;
 	document.getElementById("estoque").required = true;
-	document.getElementById("alterar").value = '0';
-	document.getElementById("salvar").value = '1';
-	document.getElementById("pesquisar").value = '0';
+	document.getElementById("alterarProduto").value = "0";
+	document.getElementById("salvarProduto").value = "1";
+	document.getElementById("pesquisarProduto").value = "0";
 	$("#modalEditarProduto").modal().show();
 }
 
@@ -82,15 +82,15 @@ function modalPesquisarProduto(){
 	document.getElementById("estoque").value = '';
 	document.getElementById("estoque").readOnly = false;
 	document.getElementById("estoque").required = false;
-	document.getElementById("alterar").value = '0';
-	document.getElementById("salvar").value = '0';
-	document.getElementById("pesquisar").value = '1';
+	document.getElementById("alterarProduto").value = "0";
+	document.getElementById("salvarProduto").value = "0";
+	document.getElementById("pesquisarProduto").value = "1";
 	$("#modalEditarProduto").modal().show();
 }
 </script>
 
 
-<form action="<c:url value='/atualizarProduto'/>" id="form" method="post" >
+<form action="<c:url value='/atualizarProduto'/>" id="formAtualizarProd" method="post" >
 <div class="modal fade" id="modalEditarProduto" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -151,15 +151,15 @@ function modalPesquisarProduto(){
   			Estoque:
   			</div>
   			<div class="input-group mb-3">
-  				<input class="form-control" id="estoque" name="estoque" type="number" min="0" required aria-describedby="inputGroup-sizing-default">
+  				<input class="form-control" id="estoque" name="estoque" type="number"  required aria-describedby="inputGroup-sizing-default">
 			</div>
 		</div>
 		
       </div>
       <div class="modal-footer">
-      	<input type="hidden" name="alterar" id="alterar" value="0">
-      	<input type="hidden" name="salvar" id="salvar" value="0">
-      	<input type="hidden" name="pesquisar" id="pesquisar" value="0">
+      	<input type="hidden" name="alterar" id="alterarProduto" value="0">
+      	<input type="hidden" name="salvar" id="salvarProduto" value="0">
+      	<input type="hidden" name="pesquisar" id="pesquisarProduto" value="0">
       	<input type="hidden" name="produtoID" id="produtoID">
       	<input type="submit" name="submit" class="btn btn-primary" value="Ok">
         <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>

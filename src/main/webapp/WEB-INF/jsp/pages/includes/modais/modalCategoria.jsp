@@ -14,9 +14,9 @@ function modalEditarCategoria(categoriaID, descricao){
 	document.getElementById("descricao").value = descricao;
 	document.getElementById("descricao").required = true;
 	document.getElementById("categoriaID").value = categoriaID;
-	document.getElementById("alterar").value = '1';
-	document.getElementById("salvar").value = '0';
-	document.getElementById("pesquisar").value = '0';
+	document.getElementById("alterarCategoria").value = '1';
+	document.getElementById("salvarCategoria").value = '0';
+	document.getElementById("pesquisarCategoria").value = '0';
 	$("#modalEditarCategoria").modal().show();
 }
 
@@ -25,9 +25,9 @@ function modalNovoCategoria(){
 	document.getElementById("descricao").value = '';
 	document.getElementById("descricao").readOnly = false;
 	document.getElementById("descricao").required = true;
-	document.getElementById("alterar").value = '0';
-	document.getElementById("salvar").value = '1';
-	document.getElementById("pesquisar").value = '0';
+	document.getElementById("alterarCategoria").value = '0';
+	document.getElementById("salvarCategoria").value = '1';
+	document.getElementById("pesquisarCategoria").value = '0';
 	$("#modalEditarCategoria").modal().show();
 }
 
@@ -37,9 +37,9 @@ function modalPesquisarCategoria(){
 	document.getElementById("descricao").value = '';
 	document.getElementById("descricao").readOnly = false;
 	document.getElementById("descricao").required = false;
-	document.getElementById("alterar").value = '0';
-	document.getElementById("salvar").value = '0';
-	document.getElementById("pesquisar").value = '1';
+	document.getElementById("alterarCategoria").value = '0';
+	document.getElementById("salvarCategoria").value = '0';
+	document.getElementById("pesquisarCategoria").value = '1';
 	$("#modalEditarCategoria").modal().show();
 }
 </script>
@@ -67,9 +67,9 @@ function modalPesquisarCategoria(){
 		
       </div>
       <div class="modal-footer">
-      	<input type="hidden" name="alterar" id="alterar" value="0">
-      	<input type="hidden" name="salvar" id="salvar" value="0">
-      	<input type="hidden" name="pesquisar" id="pesquisar" value="0">
+      	<input type="hidden" name="alterar" id="alterarCategoria" value="0">
+      	<input type="hidden" name="salvar" id="salvarCategoria" value="0">
+      	<input type="hidden" name="pesquisar" id="pesquisarCategoria" value="0">
       	<input type="hidden" name="categoriaID" id="categoriaID">
       	<input type="submit" name="submit" class="btn btn-primary" value="Ok">
         <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>

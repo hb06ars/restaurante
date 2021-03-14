@@ -11,17 +11,17 @@
 function modalDeletarVenda(campo, id){
 	document.getElementById("tabelaExclusao").value = campo;
 	document.getElementById("idExclusao").value = id;
-	$("#modalDeletar").modal().show();
+	$("#modalDeletarVenda").modal().show();
 }
 
-function confirmaDelete(){
+function confirmaDeleteVenda(){
 	var tabela = document.getElementById("tabelaExclusao").value; 
 	var id = document.getElementById("idExclusao").value;
 	window.location.href = "deletandoVenda/"+tabela+"/"+id;
 }
 
 </script>
-<div class="modal fade" id="modalDeletar" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+<div class="modal fade" id="modalDeletarVenda" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -36,7 +36,7 @@ function confirmaDelete(){
       <div class="modal-footer">
       	 <input type="hidden" id="tabelaExclusao">
       	 <input type="hidden" id="idExclusao">
-        <button type="button" class="btn btn-danger" id="deletar" onclick="confirmaDelete()" data-dismiss="modal">Sim</button>
+        <button type="button" class="btn btn-danger" id="deletar" onclick="confirmaDeleteVenda()" data-dismiss="modal">Sim</button>
         <button type="button" class="btn btn-primary" id="deletar" data-dismiss="modal">Não</button>
       </div>
     </div>

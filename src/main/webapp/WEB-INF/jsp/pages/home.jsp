@@ -126,12 +126,12 @@ function categoria(categoria){
 	var d1 = document.getElementById('listaProdutos');
 	
 	<c:set var="categ" value=""/>
-	<c:forEach items="${produtos}" varStatus="loop">
-		var index = '${produtos[loop.count].categoria.descricao}'
+	<c:forEach items="${categorias}" var="ca" varStatus="loop">
+		var index = '${ca.descricao}'
 		if(index == global_categoria){
-			<c:set var="categ" value="${produtos[loop.count].categoria.descricao}"/>
+			<c:set var="categ" value="${ca.descricao}"/>
 			d1.insertAdjacentHTML('beforeend',
-			"<c:forEach items='${produtos }' var='p' varStatus="loop">"
+			"<c:forEach items='${produtos }' var='p' varStatus="loopNovo">"
 				+ "<c:if test='${fn:toUpperCase(p.categoria.descricao) eq categ }'>"
 					+"<div class='col-6 col-md-3' >"
 						+"<div onclick='adiciona(${p.id },${p.codigo },${p.valor }, \"${p.descricao }\")' class='card border-0 mb-4'>"
@@ -294,7 +294,6 @@ function finalizandoVenda(){
 
 function imprimirNota(){
 	/*IMPRIMINDO*/
-	//Henrique
 	var table = document.getElementById("notaListaProdutos");
 	var linhas = parseInt(table.getElementsByTagName('tr').length);
 	if(linhas > 4){

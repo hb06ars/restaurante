@@ -225,6 +225,14 @@ public class ControleController {
 			p = new Produto();
 			p.setAtivo(true);
 			p.setCodigo("3");
+			p.setDescricao("RISOLE");
+			p.setValor(2.40);
+			p.setCategoria(categoriaDao.buscarDeterminadaCategoria("SALGADOS"));
+			produtoDao.save(p);
+			
+			p = new Produto();
+			p.setAtivo(true);
+			p.setCodigo("4");
 			p.setDescricao("COCA-COLA");
 			p.setValor(5.40);
 			p.setCategoria(categoriaDao.buscarDeterminadaCategoria("BEBIDAS"));
@@ -232,7 +240,7 @@ public class ControleController {
 			
 			p = new Produto();
 			p.setAtivo(true);
-			p.setCodigo("4");
+			p.setCodigo("5");
 			p.setDescricao("BOLO");
 			p.setValor(5.40);
 			p.setCategoria(categoriaDao.buscarDeterminadaCategoria("SOBREMESAS"));
@@ -506,7 +514,11 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 									user.setLogin(usuario.getLogin().replace(" ", ""));
 									user.setNome(usuario.getNome());
 									user.setPerfil(perfilDao.buscarFuncionario().get(0));
-									user.setSenha("controle21");
+									if(usuario.getSenha() == null) {
+										user.setSenha(usuario.getLogin().replace(" ", ""));
+									} else {
+										user.setSenha(usuario.getSenha());
+									}	
 									user.setTelefone(usuario.getTelefone());
 									usuarioDao.save(user);
 									msg = "Usuário "+usuario.getLogin()+" cadastrado com sucesso!";
@@ -721,7 +733,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	@RequestMapping(value = "/finalizarVenda", method = {RequestMethod.POST, RequestMethod.GET}) // Pagina de Altera��o de Perfil
 	public ModelAndView finalizaVenda(Model model, Boolean cancelar, Boolean finalizar, Integer numeroMesa, String pedidoVenda, String notaDataVenda, String valorTotalVenda, String vendas) { //Fun��o e alguns valores que recebe...
 		String link = verificaLink("/pages/home"); //Session
-		ModelAndView modelAndView = new ModelAndView(link); //JSP que ir� acessar.
+		ModelAndView modelAndView = new ModelAndView(link); //JSP que ira acessar.
 		Mesa m = mesaDao.buscarCodigo(numeroMesa);
 		if(cancelar && m != null) {
 			// Limpa a mesa cancelada...		
@@ -842,6 +854,10 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	@RequestMapping(value = "/atualizarProduto", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
 	public ModelAndView atualizarProduto(Model model, Integer produtoID, Boolean alterar, Boolean salvar, Boolean pesquisar, Produto produto, Integer produto_categoria) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		System.out.println("alterar: "+alterar);
+		System.out.println("salvar:"+salvar);
+		System.out.println("pesquisar:"+pesquisar);
+		System.out.println("produtoID:"+produtoID);
 		if(usuarioSessao != null) {
 			if(pesquisar) {
 				Produto p = produtoDao.porCodigo(produto.getCodigo());
@@ -874,6 +890,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 				registraMsg("Produto", "Alterado com sucesso.", "info");
 			}
 			else if (alterar) {
+				System.out.println("alterar "+produtoID);
 				Produto p = produtoDao.findById(produtoID).get();
 				if(p != null) {
 					p.setAtivo(true);
@@ -981,7 +998,11 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 					u.setLogin(usuario.getLogin());
 					u.setNome(usuario.getNome());
 					u.setPerfil(perfilDao.buscarFuncionario().get(0));
-					u.setSenha("controle21");
+					if(usuario.getSenha() == null) {
+						u.setSenha(usuario.getLogin());
+					} else {
+						u.setSenha(usuario.getSenha());
+					}	
 					u.setTelefone(usuario.getTelefone());
 					usuarioDao.save(u);
 					registraMsg("Usuário", "Salvo com sucesso.", "info");

@@ -49,14 +49,18 @@
 						<th>Excluir</th> 
 					</c:if>
 					<tr>
-					<th><i class="fas fa-search"></i></th>
-					<th></th>
+					<c:if test="${usuarioSessao.perfil.admin}">
+						<th></th>
+					</c:if> 
 					<th><input type="text" id="filtro1"/></th>
 					<th><input type="text" id="filtro2"/></th>
 					<th><input type="text" id="filtro3"/></th>
 					<th><input type="text" id="filtro4"/></th>
 					<th><input type="text" id="filtro5"/></th>
-					<th></th>
+					<th><input type="text" id="filtro6"/></th>
+					<c:if test="${usuarioSessao.perfil.admin}">
+						<th></th>
+					</c:if>
 					</tr>
 					</thead>
 					<tbody>
