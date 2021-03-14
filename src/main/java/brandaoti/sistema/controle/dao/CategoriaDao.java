@@ -17,4 +17,5 @@ public interface CategoriaDao extends JpaRepository<Categoria, Integer> {
 	@Query(" select p from Categoria p where upper (p.descricao) like upper (:nomeCategoria) and p.ativo = 1 ")
 	Categoria buscarDeterminadaCategoria(@Param("nomeCategoria") String acesso);
 	
+	
 }

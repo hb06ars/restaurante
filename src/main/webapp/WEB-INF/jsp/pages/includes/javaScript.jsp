@@ -65,7 +65,6 @@ function mNum(num){
 }
 
 function iniciando(){
-	
 	var msg = '${mensagem}' + '';
 	if (msg != ''){
 		if('${tipoMensagem}' == 'info'){
@@ -90,6 +89,7 @@ function iniciando(){
 	    valor = valor + " - " + semana[dia];
 	    document.getElementById("dataHoje").innerHTML = valor;
 
+		modalVendaPesquisada();
     	
 }    	
     	

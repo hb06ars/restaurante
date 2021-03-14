@@ -190,7 +190,13 @@ function expandir(campo, quantidade, pasta){
 	                    
 	                    <ul class="collapse" id="menuCadastro">
 	                        <li class="list-unstyled components mb-3" >
-	                        	<a class="text-default-secondary" style="text-decoration:none;color:inherit;" href="/home"><span class="material-icons icon text-default-secondary">deck</span> Mesas </a>
+	                        	<a class="text-default-secondary" style="text-decoration:none;color:inherit;" href="/usuarios"><span class="material-icons icon text-default-secondary">person</span> Usuários </a>
+	                        </li>
+	                        <li class="list-unstyled components mb-3" >
+	                        	<a class="text-default-secondary" style="text-decoration:none;color:inherit;" href="/cadastroMesas"><span class="material-icons icon text-default-secondary">deck</span> Mesas </a>
+	                        </li>
+	                        <li class="list-unstyled components mb-3" >
+	                        	<a class="text-default-secondary" style="text-decoration:none;color:inherit;" href="/categorias"><span class="material-icons icon text-default-secondary">category</span> Categorias </a>
 	                        </li>
 	                        <li class="list-unstyled components mb-3" >
 	                        	<a class="text-default-secondary" style="text-decoration:none;color:inherit;" href="/produtos"><span class="material-icons icon text-default-secondary">fastfood</span> Produtos </a>

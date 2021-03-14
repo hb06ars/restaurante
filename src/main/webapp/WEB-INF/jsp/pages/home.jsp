@@ -294,7 +294,6 @@ function finalizandoVenda(){
 
 function imprimirNota(){
 	/*IMPRIMINDO*/
-	
 	//Henrique
 	var table = document.getElementById("notaListaProdutos");
 	var linhas = parseInt(table.getElementsByTagName('tr').length);
@@ -309,40 +308,15 @@ function imprimirNota(){
     newWin.print();
     newWin.close();
 	document.getElementById("finalizar").value = 1;
+	document.getElementById("cancelar").value = 0;
 	finalizandoVenda();
 }
 
 
 function cancelarVenda(){
-
-	data = new Date();
-	dia  = data.getDate().toString();
-	diaF = (dia.length == 1) ? '0'+dia : dia;
-	mes  = (data.getMonth()+1).toString(); //+1 pois no getMonth Janeiro começa com zero.
-	mesF = (mes.length == 1) ? '0'+mes : mes;
-	anoF = data.getFullYear();
-	valor = diaF+"/"+mesF+"/"+anoF;
-	hora = data.getHours() + "h" + data.getMinutes() + "m"+ " - OP: ${usuarioSessao.nome}" ;
-	random = Math.floor(Math.random() * 100);
-	pedido = anoF+mesF+diaF+data.getHours()+data.getMinutes()+data.getSeconds()+random;
-
-	var table = document.getElementById("notaListaProdutos");
-	var linhas = table.getElementsByTagName('tr').length;  
-	var rowDel;
-		if(linhas > 4){
-			for(var i = 0; i < linhas; i++){
-				linhas = table.getElementsByTagName('tr').length;
-				try{
-					if(linhas > 4){
-						linhas = table.getElementsByTagName('tr').length;
-						rowDel = table.deleteRow(3);	
-					}
-				}catch(e){}
-			}		
-			document.getElementById("totalVenda").innerHTML = '0';
-		}
-		document.getElementById("numPedido").innerHTML = '-';
-		document.getElementById("notaData").innerHTML = '-';
+	document.getElementById("finalizar").value = 0;
+	document.getElementById("cancelar").value = 1;
+	finalizandoVenda();
 }
 
 
@@ -494,6 +468,7 @@ function validarCliente(telCLiente, observ){
 			
 <form action="<c:url value='/finalizarVenda'/>" id="formVenda" method="post" >
 	<input type="hidden" id="finalizar" name="finalizar" value="0" />
+	<input type="hidden" id="cancelar" name="cancelar" value="0" />
 	<input type="hidden" id="numeroMesa" name="numeroMesa" />
 	<input type="hidden" id="pedidoVenda" name="pedidoVenda" />
 	<input type="hidden" id="notaDataVenda" name="notaDataVenda" />

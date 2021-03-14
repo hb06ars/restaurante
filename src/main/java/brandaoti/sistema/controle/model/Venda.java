@@ -32,11 +32,15 @@ public class Venda {
 	private Double precoUnit;
 	@Column
 	private Double subtotal;
+	@Column
+	private Double total = 0.0;
 	
 	@ManyToOne
 	private Usuario funcionario;
-
+	@Column
 	private Boolean promocao;
+	@Column
+	private Boolean cancelada = false;
 	
 	public Integer getVendaID() {
 		return vendaID;
@@ -138,6 +142,29 @@ public class Venda {
 
 	public void setMesa(Mesa mesa) {
 		this.mesa = mesa;
+	}
+
+	public Double getTotal() {
+		return total;
+	}
+	
+	public String getTotal_str() {
+		double d = total;
+        String s = String.format("%.2f", d);
+        s = s.replace(",", ".");
+		return s;
+	}
+
+	public void setTotal(Double total) {
+		this.total = total;
+	}
+
+	public Boolean getCancelada() {
+		return cancelada;
+	}
+
+	public void setCancelada(Boolean cancelada) {
+		this.cancelada = cancelada;
 	}
 	
 	
