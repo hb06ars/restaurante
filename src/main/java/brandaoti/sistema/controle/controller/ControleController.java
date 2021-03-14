@@ -579,7 +579,6 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 		return modelAndView; 
 	}
 	
-	
 	@RequestMapping(value = "/senha", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
 	public ModelAndView senha(Model model, String confirmaSenha, String senhaAtual, String novaSenha, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
 		if(usuarioSessao != null) {
