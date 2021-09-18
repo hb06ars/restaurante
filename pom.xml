@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>brandaoti.sistema.controle</groupId>
-	<artifactId>Ligaweb</artifactId>
+	<artifactId>Controle</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Controle</name>
 	<description>Controle</description>

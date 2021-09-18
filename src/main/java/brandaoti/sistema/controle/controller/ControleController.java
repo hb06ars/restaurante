@@ -10,6 +10,10 @@ import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -46,8 +50,9 @@ import brandaoti.sistema.controle.model.Venda;
 
 
 @Controller
-public class ControleController {
+public class ControleController extends HttpServlet {
 	
+	private static final long serialVersionUID = 1L;
 	@Autowired
 	private UsuarioDao usuarioDao;
 	@Autowired
@@ -61,27 +66,14 @@ public class ControleController {
 	@Autowired
 	private VendaDao vendaDao;
 	
-	public static Usuario usuarioSessao;
-	public static String atualizarPagina = null;
+	//public static Usuario usuarioSessao;
+	//public static String atualizarPagina = null;
 	public static String mensagem = "";
 	public static String tituloMensagem = "";
 	public static String tipoMensagem = "";
 	public static String periodoAtual = "";
 	public static String hoje = "";
-	public static String itemMenuSelecionado = "home";
-	
-	public String verificaLink(String link) {
-		String direcao = "deslogar";
-		if(usuarioSessao != null) {
-			direcao = link;
-			itemMenuSelecionado = link;
-		} else {
-			direcao = "deslogar";
-			atualizarPagina = null;
-			itemMenuSelecionado = "home";
-		}
-		return direcao;
-	}
+	//public static String itemMenuSelecionado = "home";
 	
 	public void registraMsg(String titulo, String msg, String tipo) {
 		tituloMensagem = titulo;
@@ -144,7 +136,7 @@ public class ControleController {
 	}
 	
 	@GetMapping({"/","/index"}) 
-		public ModelAndView index(Model model) { 
+		public ModelAndView index(HttpServletRequest request, HttpServletResponse response, Model model) { 
 		ModelAndView modelAndView = new ModelAndView("index");
 		List<Usuario> usuarios = usuarioDao.findAll();
 		List<Perfil> perfis = perfilDao.findAll();
@@ -252,7 +244,7 @@ public class ControleController {
 		
 		
 		
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+		model.addAttribute("itemMenuSelecionado", "home");
 		return modelAndView; 
 	}
 	
@@ -262,18 +254,24 @@ public class ControleController {
 	/* SALVAR EXCEL */
 	@Transactional
 	@RequestMapping(value = "/upload/excel", method = {RequestMethod.POST, RequestMethod.GET}) // Pagina de Altera��o de Perfil
-	public ModelAndView uploadExcel(Model model, String tabelaUsada, @ModelAttribute MultipartFile file) throws Exception, IOException { //Fun��o e alguns valores que recebe...
-		String link = verificaLink("/pages/home"); //Session
-		if(usuarioSessao.getPerfil().getAdmin()) {
+	public ModelAndView uploadExcel(HttpServletRequest request, HttpServletResponse response, Model model, String tabelaUsada, @ModelAttribute MultipartFile file) throws Exception, IOException { //Fun��o e alguns valores que recebe...
+		String link = "/pages/home"; //Session
+		String atualizarPagina = "";
+		HttpSession session = request.getSession();
+		Usuario usuarioSessao = new Usuario();
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getPerfil() != null && usuarioSessao.getPerfil().getAdmin()) {
 			switch (tabelaUsada) {  
 		       case "produtos" :
 		    	   processaProduto(file);
-		    	   link = verificaLink("/pages/produtos");
+		    	   link = "/pages/produtos";
 		    	   atualizarPagina = "/produtos";
 		    	   break;
 		       case "usuarios" :
 		    	   processaUsuario(file);
-		    	   link = verificaLink("/pages/usuarios");
+		    	   link = "/pages/usuarios";
 		    	   atualizarPagina = "/usuarios";
 		    	   break;
 			}
@@ -288,7 +286,6 @@ public class ControleController {
 	
 @SuppressWarnings("deprecation")
 public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws Exception {
-		
 		List<Tabela> tabelas = new ArrayList<Tabela>();
 		int linha = 1;
 		int coluna = 0;
@@ -343,17 +340,23 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@GetMapping(value = "/deslogar")
-	public ModelAndView deslogar(Model model) {  
-		String link = "/deslogar";
-		usuarioSessao = null;
-		ModelAndView modelAndView = new ModelAndView(link); 
-		return modelAndView; 
+	public void deslogar(HttpServletRequest request, HttpServletResponse response) throws IOException {  
+		HttpSession session = request.getSession();
+		session.invalidate();
+		response.sendRedirect("/");
 	}
 	
 	
 	@RequestMapping(value = "/adm/deletando/{tabela}/{id}", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE}) // Pagina de Alteração de Perfil
-	public ModelAndView deletando(Model model,@PathVariable("tabela") String tabela, @PathVariable("id") Integer id) { //Função e alguns valores que recebe...
-		String link = verificaLink("/deslogar");
+	public ModelAndView deletando(HttpServletRequest request, HttpServletResponse response, Model model,@PathVariable("tabela") String tabela, @PathVariable("id") Integer id) { //Função e alguns valores que recebe...
+		String link = "/deslogar";
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
 		if(usuarioSessao.getPerfil().getAdmin()) {
 			model.addAttribute("usuarioSessao", usuarioSessao);
 			link = "/pages/"+tabela;
@@ -370,21 +373,21 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 				registraMsg("Token", "Deletado com sucesso.", "erro");
 			}
 			if(tabela.equals("excluirUsuario")) {
-				link = verificaLink("pages/adversario");
-				atualizarPagina = "/adversario";
+				link = "pages/usuarios";
+				atualizarPagina = "/usuarios";
 				Usuario objeto = usuarioDao.findById(id).get();
 				if(objeto != null) {
 					usuarioDao.deleteById(objeto.getId());
 					usuarioDao.flush();
 				}
-				List<Usuario> adversario = usuarioDao.funcionario();
-				model.addAttribute("adversario", adversario);
+				List<Usuario> usuario = usuarioDao.funcionario();
+				model.addAttribute("usuario", usuario);
 				model.addAttribute("atualizarPagina", atualizarPagina);
 				model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
 				registraMsg("Funcionário", "Deletado com sucesso.", "erro");
 			}
 			if(tabela.equals("produto")) {
-				link = verificaLink("pages/produtos");
+				link = "pages/produtos";
 				atualizarPagina = "/produtos";
 				Produto objeto = produtoDao.findById(id).get();
 				if(objeto != null) {
@@ -405,7 +408,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 				registraMsg("Produto", "Deletado com sucesso.", "erro");
 			}
 			if(tabela.equals("categoria")) {
-				link = verificaLink("pages/categorias");
+				link = "pages/categorias";
 				atualizarPagina = "/categorias";
 				Categoria objeto = categoriaDao.findById(id).get();
 				if(objeto != null) {
@@ -426,7 +429,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 				registraMsg("Categoria", "Deletada com sucesso.", "erro");
 			}
 			if(tabela.equals("usuario")) {
-				link = verificaLink("pages/usuarios");
+				link = "pages/usuarios";
 				atualizarPagina = "/usuarios";
 				Usuario objeto = usuarioDao.findById(id).get();
 				if(objeto != null) {
@@ -456,13 +459,20 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "deletandoVenda/{tabela}/{id}", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE}) // Pagina de Alteração de Perfil
-	public ModelAndView deletandoVenda(Model model,@PathVariable("tabela") String tabela, @PathVariable("id") String id) { //Função e alguns valores que recebe...
-		String link = verificaLink("/deslogar");
+	public ModelAndView deletandoVenda(HttpServletRequest request, HttpServletResponse response, Model model,@PathVariable("tabela") String tabela, @PathVariable("id") String id) { //Função e alguns valores que recebe...
+		String link = "/deslogar";
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
 		if(usuarioSessao.getPerfil().getAdmin()) {
 			model.addAttribute("usuarioSessao", usuarioSessao);
 			link = "/pages/"+tabela;
 			if(tabela.equals("venda")) {
-				link = verificaLink("pages/pedidos");
+				link = "pages/pedidos";
 				atualizarPagina = "/pedidos";
 				List<Venda> vendas = vendaDao.nota(id);
 				System.out.println("SIZE: "+vendas.size());
@@ -497,7 +507,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/criar", method = {RequestMethod.POST,RequestMethod.GET})
-	public ModelAndView criar(Model model, Usuario usuario, String codigoAcesso, String confirmaSenha) {  
+	public ModelAndView criar(HttpServletRequest request, HttpServletResponse response, Model model, Usuario usuario, String codigoAcesso, String confirmaSenha) {  
 		String link = "/criar";
 		String erro="";
 		String msg="";
@@ -548,40 +558,60 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/home", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView logar(Model model, @RequestParam(value = "usuarioVal", defaultValue = "", required=false ) String variavelUsuario, @RequestParam(value = "senhaVal", defaultValue = "", required=false ) String variavelSenha) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+	public ModelAndView logar(HttpServletRequest request, HttpServletResponse response, Model model, @RequestParam(value = "usuarioVal", defaultValue = "", required=false ) String variavelUsuario, @RequestParam(value = "senhaVal", defaultValue = "", required=false ) String variavelSenha) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
 		Usuario usu = usuarioDao.fazerLogin(variavelUsuario, variavelSenha);
-		if(usu != null)
+		HttpSession session = request.getSession();
+		Usuario usuarioSessao = new Usuario();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		String link = "deslogar";
+		if(usu != null) {
 			usuarioSessao = usu;
-		if(usu != null || usuarioSessao != null) {
+			session.setAttribute("usuarioSessao", usuarioSessao);
 			model.addAttribute("usuarioSessao", usuarioSessao);
 		}
-		List<Mesa> mesas = mesaDao.buscarMesas();
-		List<Categoria> categorias = categoriaDao.buscarCategorias();
-		List<Produto> produtos = produtoDao.buscarProdutos();
-		
-		List<Venda> vendas = vendaDao.mesaAberta();
-		Double totalinicio = 0.0;
-		for(Venda  ve : vendas) {
-			totalinicio = totalinicio+ve.getSubtotal();
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+			model.addAttribute("usuarioSessao", usuarioSessao);
 		}
-		double d = totalinicio;
-        String s = String.format("%.2f", d);
-        s = s.replace(",", ".");
-        
-		String link = verificaLink("pages/home");
-		model.addAttribute("totalinicio", s);
-		model.addAttribute("mesas", mesas);
-		model.addAttribute("vendas", vendas);
-		model.addAttribute("categorias", categorias);
-		model.addAttribute("produtos", produtos);
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
+			List<Mesa> mesas = mesaDao.buscarMesas();
+			List<Categoria> categorias = categoriaDao.buscarCategorias();
+			List<Produto> produtos = produtoDao.buscarProdutos();
+			
+			List<Venda> vendas = vendaDao.mesaAberta();
+			Double totalinicio = 0.0;
+			for(Venda  ve : vendas) {
+				totalinicio = totalinicio+ve.getSubtotal();
+			}
+			double d = totalinicio;
+	        String s = String.format("%.2f", d);
+	        s = s.replace(",", ".");
+	        
+			link = "pages/home";
+			model.addAttribute("totalinicio", s);
+			model.addAttribute("mesas", mesas);
+			model.addAttribute("vendas", vendas);
+			model.addAttribute("categorias", categorias);
+			model.addAttribute("produtos", produtos);
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+		}
 		ModelAndView modelAndView = new ModelAndView(link);
 		return modelAndView; 
 	}
 	
 	@RequestMapping(value = "/senha", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView senha(Model model, String confirmaSenha, String senhaAtual, String novaSenha, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
-		if(usuarioSessao != null) {
+	public ModelAndView senha(HttpServletRequest request, HttpServletResponse response, Model model, String confirmaSenha, String senhaAtual, String novaSenha, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		String link = "deslogar";
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
+			link = "pages/senha";
 			if(confirmaSenha != null) {
 				if(!confirmaSenha.equals("")) {
 					if(confirmaSenha.equals(novaSenha)) {
@@ -600,7 +630,6 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			}
 			model.addAttribute("usuarioSessao", usuarioSessao);
 		}
-		String link = verificaLink("pages/senha");
 		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		ModelAndView modelAndView = new ModelAndView(link);
 		enviaMsg(modelAndView);
@@ -610,8 +639,17 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/cadastroMesas", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView cadastroMesas(Model model, Integer mesas) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
-		if(usuarioSessao != null) {
+	public ModelAndView cadastroMesas(HttpServletRequest request, HttpServletResponse response, Model model, Integer mesas) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		String link = "deslogar";
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
+			link = "pages/cadastroMesas";
 			Integer m = mesaDao.buscarMesas().size();
 			//Deletando mesas a mais.
 			if(mesas != null && mesas > 0) {
@@ -643,11 +681,10 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			}
 		m = mesaDao.buscarMesas().size();
 		model.addAttribute("totalMesas", m);
-		}
 		model.addAttribute("usuarioSessao", usuarioSessao);
-		String link = verificaLink("pages/cadastroMesas");
 		model.addAttribute("mesas", mesas);
 		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+		}
 		ModelAndView modelAndView = new ModelAndView(link);
 		enviaMsg(modelAndView);
 		return modelAndView; 
@@ -656,16 +693,23 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/produtos", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView produtos(Model model, Produto produto) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
-		if(usuarioSessao != null) {
+	public ModelAndView produtos(HttpServletRequest request, HttpServletResponse response, Model model, Produto produto) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		String link = "deslogar";
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
 			List<Produto> produtos = produtoDao.buscarProdutos();
 			List<Categoria> categorias = categoriaDao.buscarCategorias();
-			
 			model.addAttribute("categorias", categorias);
 			model.addAttribute("produtos", produtos);
+			model.addAttribute("usuarioSessao", usuarioSessao);
+			link = "pages/produtos";
 		}
-		model.addAttribute("usuarioSessao", usuarioSessao);
-		String link = verificaLink("pages/produtos");
 		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		ModelAndView modelAndView = new ModelAndView(link);
 		enviaMsg(modelAndView);
@@ -675,14 +719,23 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/categorias", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView categorias(Model model, Categoria categoria) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
-		if(usuarioSessao != null) {
+	public ModelAndView categorias(HttpServletRequest request, HttpServletResponse response, Model model, Categoria categoria) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		String link = "deslogar";
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
 			List<Categoria> categorias = categoriaDao.buscarCategorias();
 			model.addAttribute("categorias", categorias);
+			model.addAttribute("usuarioSessao", usuarioSessao);
+			link = "pages/categorias";
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+			
 		}
-		model.addAttribute("usuarioSessao", usuarioSessao);
-		String link = verificaLink("pages/categorias");
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		ModelAndView modelAndView = new ModelAndView(link);
 		enviaMsg(modelAndView);
 		return modelAndView; 
@@ -690,14 +743,22 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/usuarios", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView usuarios(Model model, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
-		if(usuarioSessao != null) {
+	public ModelAndView usuarios(HttpServletRequest request, HttpServletResponse response, Model model, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		String link = "deslogar";
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
 			List<Usuario> usuarios = usuarioDao.usuarios();
 			model.addAttribute("usuarios", usuarios);
+			model.addAttribute("usuarioSessao", usuarioSessao);
+			link = "pages/usuarios";
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		}
-		model.addAttribute("usuarioSessao", usuarioSessao);
-		String link = verificaLink("pages/usuarios");
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		ModelAndView modelAndView = new ModelAndView(link);
 		enviaMsg(modelAndView);
 		return modelAndView; 
@@ -705,8 +766,16 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/token", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView token(Model model, Integer criarToken, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
-		if(usuarioSessao != null) {
+	public ModelAndView token(HttpServletRequest request, HttpServletResponse response, Model model, Integer criarToken, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		String link = "deslogar";
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
 			if(criarToken != null) {
 				if(criarToken == 1) {
 					Usuario u = new Usuario();
@@ -719,9 +788,9 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			List<Usuario> tokens = usuarioDao.buscaTokens();
 			model.addAttribute("tokens", tokens);
 			model.addAttribute("usuarioSessao", usuarioSessao);
+			link = "pages/token";
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		}
-		String link = verificaLink("pages/token");
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		ModelAndView modelAndView = new ModelAndView(link);
 		return modelAndView; 
 	}
@@ -730,121 +799,134 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	/* SALVAR VENDA */
 	@RequestMapping(value = "/finalizarVenda", method = {RequestMethod.POST, RequestMethod.GET}) // Pagina de Altera��o de Perfil
-	public ModelAndView finalizaVenda(Model model, Boolean cancelar, Boolean finalizar, Integer numeroMesa, String pedidoVenda, String notaDataVenda, String valorTotalVenda, String vendas) { //Fun��o e alguns valores que recebe...
-		String link = verificaLink("/pages/home"); //Session
-		ModelAndView modelAndView = new ModelAndView(link); //JSP que ira acessar.
+	public ModelAndView finalizaVenda(HttpServletRequest request, HttpServletResponse response, Model model, Boolean cancelar, Boolean finalizar, Integer numeroMesa, String pedidoVenda, String notaDataVenda, String valorTotalVenda, String vendas) { //Fun��o e alguns valores que recebe...
+		ModelAndView modelAndView = new ModelAndView("deslogar"); //JSP que ira acessar.
 		Mesa m = mesaDao.buscarCodigo(numeroMesa);
-		if(cancelar && m != null) {
-			// Limpa a mesa cancelada...		
-			m.setReservada(false);
-			m.setNota(null);
-			m.setEntrada(null);
-			m.setClienteQueReservou(null);
-			m.setPaga(false);
-			m.setOcupada(false);
-			m.setTotal(0.0);
-			m.setSaida(null);
-			
-			for(Venda vc : m.getVendas()) {
-				vc.setAtivo(false);
-				vc.setCancelada(true);
-				vendaDao.save(vc);
-			}
-			
-		} else {
-			//Ocupando a mesa...
-			if(m == null)
-				m = new Mesa();
-			
-			if(finalizar) {
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		String link = "deslogar";
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
+			link = "/pages/home"; //Session
+			modelAndView = new ModelAndView(link); //JSP que ira acessar.
+			if(cancelar && m != null) {
+				// Limpa a mesa cancelada...		
 				m.setReservada(false);
+				m.setNota(null);
 				m.setEntrada(null);
 				m.setClienteQueReservou(null);
-				m.setPaga(true);
+				m.setPaga(false);
 				m.setOcupada(false);
 				m.setTotal(0.0);
-				m.setSaida(LocalDateTime.now());
+				m.setSaida(null);
+				
+				for(Venda vc : m.getVendas()) {
+					vc.setAtivo(false);
+					vc.setCancelada(true);
+					vendaDao.save(vc);
+				}
+				
 			} else {
-				m.setOcupada(true);
-				m.setTotal(Double.parseDouble(valorTotalVenda));
-			}
-			m.setAtivo(true);
-			m.setNumeroDaMesa(numeroMesa);
-			m.setNota(pedidoVenda);
-			if(m.getEntrada() == null)
-				m.setEntrada(LocalDateTime.now());
-			
-			mesaDao.save(m);
-			
-			//Limpando pra inserir os itens:
-			Mesa limpaMesas = mesaDao.buscarCodigo(numeroMesa);
-			limpaMesas.setVendas(null);
-			mesaDao.save(limpaMesas);
-			
-			List<Venda> v = vendaDao.vendaPorMesa(numeroMesa, pedidoVenda);
-			for(Venda ve : v) {
-				vendaDao.deleteById(ve.getVendaID());
-				vendaDao.flush();
-			}
-			
-			// Inserindo os produtos na mesa
-			List<Venda> vendaList = new ArrayList<Venda>();
-			try {
-				JSONObject obj = new JSONObject(vendas);
-				JSONArray arr = obj.getJSONArray("Produtos");
-		        for (int i = 0; i < arr.length(); i++) {
-		        	String codigo = arr.getJSONObject(i).getString("codigo");
-		        	String qtd = arr.getJSONObject(i).getString("qtd");
-		        	Produto pr = produtoDao.porCodigo(codigo);
-					if(pr != null && pr.getCodigo() != null) {
-		        		Venda venda = new Venda();
-		        		venda.setPedido(pedidoVenda);
-		        		venda.setMesa(mesaDao.buscarCodigo(numeroMesa));
-		        		pr.setEstoque(pr.getEstoque() - Integer.parseInt(qtd));
-		        		venda.setProdutos(pr);
-		        		if(pr.getPrecoPromocional() > 0.0) {
-		        			venda.setPrecoUnit((pr.getPrecoPromocional()));
-		        		} else {
-		        			venda.setPrecoUnit((pr.getValor()));
-		        		}
-		        		venda.setQuantidade(Integer.parseInt(qtd));
-		        		venda.setSubtotal(Integer.parseInt(qtd) * (pr.getValor()));
-		        		if(pr.getPrecoPromocional() > 0) {
-		        			venda.setPromocao(true);
-		        		}
-		        		venda.setFuncionario(usuarioSessao);
-		        		vendaDao.save(venda);
-		        		vendaList.add(venda);
-		        		produtoDao.save(pr);
-		        	}
-					
-		        }
-			}catch(Exception e) {
-				System.out.println("Erro: "+ e);
-				registraMsg("Erro na Venda", "Ocorreu um erro: " + e , "erro");
-			}
-			if(vendaList.size() > 0) {
-				m.setVendas(vendaList);
+				//Ocupando a mesa...
+				if(m == null)
+					m = new Mesa();
+				
+				if(finalizar) {
+					m.setReservada(false);
+					m.setEntrada(null);
+					m.setClienteQueReservou(null);
+					m.setPaga(true);
+					m.setOcupada(false);
+					m.setTotal(0.0);
+					m.setSaida(LocalDateTime.now());
+				} else {
+					m.setOcupada(true);
+					m.setTotal(Double.parseDouble(valorTotalVenda));
+				}
+				m.setAtivo(true);
+				m.setNumeroDaMesa(numeroMesa);
+				m.setNota(pedidoVenda);
+				if(m.getEntrada() == null)
+					m.setEntrada(LocalDateTime.now());
+				
 				mesaDao.save(m);
+				
+				//Limpando pra inserir os itens:
+				Mesa limpaMesas = mesaDao.buscarCodigo(numeroMesa);
+				limpaMesas.setVendas(null);
+				mesaDao.save(limpaMesas);
+				
+				List<Venda> v = vendaDao.vendaPorMesa(numeroMesa, pedidoVenda);
+				for(Venda ve : v) {
+					vendaDao.deleteById(ve.getVendaID());
+					vendaDao.flush();
+				}
+				
+				// Inserindo os produtos na mesa
+				List<Venda> vendaList = new ArrayList<Venda>();
+				try {
+					JSONObject obj = new JSONObject(vendas);
+					JSONArray arr = obj.getJSONArray("Produtos");
+			        for (int i = 0; i < arr.length(); i++) {
+			        	String codigo = arr.getJSONObject(i).getString("codigo");
+			        	String qtd = arr.getJSONObject(i).getString("qtd");
+			        	Produto pr = produtoDao.porCodigo(codigo);
+						if(pr != null && pr.getCodigo() != null) {
+			        		Venda venda = new Venda();
+			        		venda.setPedido(pedidoVenda);
+			        		venda.setMesa(mesaDao.buscarCodigo(numeroMesa));
+			        		pr.setEstoque(pr.getEstoque() - Integer.parseInt(qtd));
+			        		venda.setProdutos(pr);
+			        		if(pr.getPrecoPromocional() > 0.0) {
+			        			venda.setPrecoUnit((pr.getPrecoPromocional()));
+			        		} else {
+			        			venda.setPrecoUnit((pr.getValor()));
+			        		}
+			        		venda.setQuantidade(Integer.parseInt(qtd));
+			        		venda.setSubtotal(Integer.parseInt(qtd) * (pr.getValor()));
+			        		if(pr.getPrecoPromocional() > 0) {
+			        			venda.setPromocao(true);
+			        		}
+			        		venda.setFuncionario(usuarioSessao);
+			        		vendaDao.save(venda);
+			        		vendaList.add(venda);
+			        		produtoDao.save(pr);
+			        	}
+						
+			        }
+				}catch(Exception e) {
+					System.out.println("Erro: "+ e);
+					registraMsg("Erro na Venda", "Ocorreu um erro: " + e , "erro");
+				}
+				if(vendaList.size() > 0) {
+					m.setVendas(vendaList);
+					mesaDao.save(m);
+				}
 			}
+			
+			
+			
+			
+			
+			List<Mesa> mesas = mesaDao.buscarMesas();
+			List<Categoria> categorias = categoriaDao.buscarCategorias();
+			List<Produto> produtos = produtoDao.buscarProdutos();
+			link = "pages/home";
+			model.addAttribute("mesas", mesas);
+			model.addAttribute("categorias", categorias);
+			model.addAttribute("produtos", produtos);
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+			
+			registraMsg("Venda", "Venda finalizada com sucesso.", "info");
+			atualizarPagina = "/home";
+			modelAndView.addObject("atualizarPagina", atualizarPagina);
+			
+			
 		}
-		
-		
-		
-		
-		
-		List<Mesa> mesas = mesaDao.buscarMesas();
-		List<Categoria> categorias = categoriaDao.buscarCategorias();
-		List<Produto> produtos = produtoDao.buscarProdutos();
-		link = verificaLink("pages/home");
-		model.addAttribute("mesas", mesas);
-		model.addAttribute("categorias", categorias);
-		model.addAttribute("produtos", produtos);
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
-		
-		registraMsg("Venda", "Venda finalizada com sucesso.", "info");
-		atualizarPagina = "/home";
-		modelAndView.addObject("atualizarPagina", atualizarPagina);
 		return modelAndView; //Retorna para a p�gina
 	}
 	
@@ -852,12 +934,21 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/atualizarProduto", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView atualizarProduto(Model model, Integer produtoID, Boolean alterar, Boolean salvar, Boolean pesquisar, Produto produto, Integer produto_categoria) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+	public ModelAndView atualizarProduto(HttpServletRequest request, HttpServletResponse response, Model model, Integer produtoID, Boolean alterar, Boolean salvar, Boolean pesquisar, Produto produto, Integer produto_categoria) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
 		System.out.println("alterar: "+alterar);
 		System.out.println("salvar:"+salvar);
 		System.out.println("pesquisar:"+pesquisar);
 		System.out.println("produtoID:"+produtoID);
-		if(usuarioSessao != null) {
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		String link = "deslogar";
+		ModelAndView modelAndView = new ModelAndView("deslogar");
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
 			if(pesquisar) {
 				Produto p = produtoDao.porCodigo(produto.getCodigo());
 				if(p != null) {
@@ -914,20 +1005,29 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			}
 			
 			model.addAttribute("usuarioSessao", usuarioSessao);
+			link = "pages/produtos";
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+			modelAndView = new ModelAndView(link);
+			atualizarPagina = "/produtos";
+			modelAndView.addObject("atualizarPagina", atualizarPagina);
+			enviaMsg(modelAndView);
 		}
-		String link = verificaLink("pages/produtos");
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
-		ModelAndView modelAndView = new ModelAndView(link);
-		atualizarPagina = "/produtos";
-		modelAndView.addObject("atualizarPagina", atualizarPagina);
-		enviaMsg(modelAndView);
 		return modelAndView; 
 	}
 	
 	
 	@RequestMapping(value = "/atualizarCategoria", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView atualizarCategoria(Model model, Integer categoriaID, Boolean alterar, Boolean salvar, Boolean pesquisar, Categoria categoria) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
-		if(usuarioSessao != null) {
+	public ModelAndView atualizarCategoria(HttpServletRequest request, HttpServletResponse response, Model model, Integer categoriaID, Boolean alterar, Boolean salvar, Boolean pesquisar, Categoria categoria) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		String link = "deslogar";
+		ModelAndView modelAndView = new ModelAndView(link);
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
 			if(pesquisar) {
 				Categoria c = categoriaDao.findById(categoriaID).get();
 				if(c != null) {
@@ -961,25 +1061,32 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 				model.addAttribute("categorias", categorias);
 				registraMsg("Categorias", "Salvo com sucesso.", "info");
 			}
-			
 			model.addAttribute("usuarioSessao", usuarioSessao);
+			link = "pages/categorias";
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+			modelAndView = new ModelAndView(link);
+			atualizarPagina = "/categorias";
+			modelAndView.addObject("atualizarPagina", atualizarPagina);
+			enviaMsg(modelAndView);
 		}
-		String link = verificaLink("pages/categorias");
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
-		ModelAndView modelAndView = new ModelAndView(link);
-		atualizarPagina = "/categorias";
-		modelAndView.addObject("atualizarPagina", atualizarPagina);
-		enviaMsg(modelAndView);
 		return modelAndView; 
 	}
 	
 	
 	
 	@RequestMapping(value = "/atualizarUsuario", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
-	public ModelAndView atualizarUsuario(Model model, Integer usuarioID, Boolean alterar, Boolean salvar, Boolean pesquisar, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
-		String link = verificaLink("pages/usuarios");
+	public ModelAndView atualizarUsuario(HttpServletRequest request, HttpServletResponse response, Model model, Integer usuarioID, Boolean alterar, Boolean salvar, Boolean pesquisar, Usuario usuario) { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
+		String link = "deslogar";
 		ModelAndView modelAndView = new ModelAndView(link);
-		if(usuarioSessao != null) {
+		HttpSession session = request.getSession();
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
+		}
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
+			link = "pages/usuarios";
 			if(pesquisar) {
 				Usuario u = usuarioDao.findById(usuarioID).get();
 				if(u != null) {
@@ -1036,11 +1143,11 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			}
 			
 			model.addAttribute("usuarioSessao", usuarioSessao);
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+			enviaMsg(modelAndView);
+			atualizarPagina = "/usuarios";
+			modelAndView.addObject("atualizarPagina", atualizarPagina);
 		}
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
-		enviaMsg(modelAndView);
-		atualizarPagina = "/usuarios";
-		modelAndView.addObject("atualizarPagina", atualizarPagina);
 		return modelAndView; 
 	}
 	
@@ -1112,52 +1219,64 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	
 	
 	@RequestMapping(value = "/pedidos", method = {RequestMethod.GET, RequestMethod.POST}) // Pagina de Vendas
-	public ModelAndView pedidos(Model model, String nota, String pesquisarVendaID) { //Fun��o e alguns valores que recebe...
-		String link = verificaLink("/pages/pedidos");
-		ModelAndView modelAndView = new ModelAndView(link); //JSP que ir� acessar
-		model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
-		List<Venda> vendas = new ArrayList<Venda>();
-		if(nota == null) {
-			vendas = vendaDao.ultimas();
-		} else {
-			vendas = vendaDao.nota(nota);
+	public ModelAndView pedidos(HttpServletRequest request, HttpServletResponse response, Model model, String nota, String pesquisarVendaID) { //Fun��o e alguns valores que recebe...
+		HttpSession session = request.getSession();
+		ModelAndView modelAndView = new ModelAndView("deslogar"); //JSP que ir� acessar
+		String atualizarPagina = "";
+		String itemMenuSelecionado = "";
+		Usuario usuarioSessao = new Usuario();
+		if(session.getAttribute("usuarioSessao") != null) {
+			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
 		}
-			List<Venda> vendaAnterior = vendas;
-			List<Venda> vendaFinal = new ArrayList<Venda>();
-			int ini = 0;
-			for(Venda v : vendas) {
-				if(ini > 0 ) {
-					if(v.getPedido() != vendaAnterior.get(ini-1).getPedido()) {
+		String link = "deslogar";
+		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
+			link = "/pages/pedidos";
+			modelAndView = new ModelAndView(link); //JSP que ir� acessar
+			model.addAttribute("itemMenuSelecionado", itemMenuSelecionado);
+			List<Venda> vendas = new ArrayList<Venda>();
+			if(nota == null) {
+				vendas = vendaDao.ultimas();
+			} else {
+				vendas = vendaDao.nota(nota);
+			}
+				List<Venda> vendaAnterior = vendas;
+				List<Venda> vendaFinal = new ArrayList<Venda>();
+				int ini = 0;
+				for(Venda v : vendas) {
+					if(ini > 0 ) {
+						if(v.getPedido() != vendaAnterior.get(ini-1).getPedido()) {
+							vendaFinal.add(v);
+						}
+					} else {
 						vendaFinal.add(v);
 					}
-				} else {
-					vendaFinal.add(v);
+					ini++;
 				}
-				ini++;
-			}
-			vendas.clear();
-			vendas = vendaFinal;
-		
-		
-		if(pesquisarVendaID != null) {
-			List<Venda> vendaSelecionada = vendaDao.porPedido(pesquisarVendaID);
-			//Calculando o Total
-			Double totalDaNota = 0.0;
-			for(Venda venda : vendaSelecionada) {
-				totalDaNota = totalDaNota + venda.getSubtotal();
-			}
-			for(Venda venda : vendaSelecionada) {
-				venda.setTotal(totalDaNota);
-				vendaDao.save(venda);
-			}
-			//Calculando o Total
+				vendas.clear();
+				vendas = vendaFinal;
 			
-			modelAndView.addObject("vendaSelecionada", vendaSelecionada);
+			
+			if(pesquisarVendaID != null) {
+				List<Venda> vendaSelecionada = vendaDao.porPedido(pesquisarVendaID);
+				//Calculando o Total
+				Double totalDaNota = 0.0;
+				for(Venda venda : vendaSelecionada) {
+					totalDaNota = totalDaNota + venda.getSubtotal();
+				}
+				for(Venda venda : vendaSelecionada) {
+					venda.setTotal(totalDaNota);
+					vendaDao.save(venda);
+				}
+				//Calculando o Total
+				
+				modelAndView.addObject("vendaSelecionada", vendaSelecionada);
+			}
+			
+			modelAndView.addObject("usuarioSessao", usuarioSessao);
+			modelAndView.addObject("vendas", vendas);
+			enviaMsg(modelAndView);
+
 		}
-		
-		modelAndView.addObject("usuarioSessao", usuarioSessao);
-		modelAndView.addObject("vendas", vendas);
-		enviaMsg(modelAndView);
 		return modelAndView; //retorna a variavel
 	}
 	
