@@ -455,7 +455,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			}
 			
 		}
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		enviaMsg(request);
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
@@ -555,7 +555,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 				}
 			}
 		}	
-		ModelAndView modelAndView = new ModelAndView(link); 
+		 
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
 	
@@ -592,6 +592,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	        s = s.replace(",", ".");
 	        
 			link = "pages/home";
+			itemMenuSelecionado = "home";
 			request.setAttribute("totalinicio", s);
 			request.setAttribute("mesas", mesas);
 			request.setAttribute("vendas", vendas);
@@ -599,7 +600,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			request.setAttribute("produtos", produtos);
 			request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		}
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
 	
@@ -634,7 +635,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			request.setAttribute("usuarioSessao", usuarioSessao);
 		}
 		request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		enviaMsg(request);
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
@@ -688,7 +689,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 		request.setAttribute("mesas", mesas);
 		request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		}
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		enviaMsg(request);
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
@@ -711,10 +712,11 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			request.setAttribute("categorias", categorias);
 			request.setAttribute("produtos", produtos);
 			request.setAttribute("usuarioSessao", usuarioSessao);
+			itemMenuSelecionado = "produto";
 			link = "pages/produtos";
 		}
 		request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		enviaMsg(request);
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
@@ -739,7 +741,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
 			
 		}
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		enviaMsg(request);
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
@@ -762,7 +764,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			link = "pages/usuarios";
 			request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		}
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		enviaMsg(request);
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
@@ -794,7 +796,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			link = "pages/token";
 			request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
 		}
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		request.getRequestDispatcher("/WEB-INF/jsp/"+link+".jsp").forward(request, response); 
 	}
 	
@@ -1026,7 +1028,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 		String itemMenuSelecionado = "";
 		Usuario usuarioSessao = new Usuario();
 		String link = "deslogar";
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		if(session.getAttribute("usuarioSessao") != null) {
 			usuarioSessao = (Usuario) session.getAttribute("usuarioSessao");
 		}
@@ -1067,7 +1069,6 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 			request.setAttribute("usuarioSessao", usuarioSessao);
 			link = "pages/categorias";
 			request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
-			modelAndView = new ModelAndView(link);
 			atualizarPagina = "/categorias";
 			request.setAttribute("atualizarPagina", atualizarPagina);
 			enviaMsg(request);
@@ -1080,7 +1081,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 	@RequestMapping(value = "/atualizarUsuario", method = {RequestMethod.POST,RequestMethod.GET}) // Link do submit do form e o method POST que botou la
 	public void atualizarUsuario(HttpServletRequest request, HttpServletResponse response, Integer usuarioID, Boolean alterar, Boolean salvar, Boolean pesquisar, Usuario usuario) throws ServletException, IOException { // model é usado para mandar , e variavelNome está recebendo o name="nome" do submit feito na pagina principal 
 		String link = "deslogar";
-		ModelAndView modelAndView = new ModelAndView(link);
+		
 		HttpSession session = request.getSession();
 		String atualizarPagina = "";
 		String itemMenuSelecionado = "";
@@ -1234,7 +1235,7 @@ public List<Tabela> uploadExcelFile(@ModelAttribute MultipartFile file) throws E
 		String link = "deslogar";
 		if(usuarioSessao!= null && usuarioSessao.getId() != null) {
 			link = "/pages/pedidos";
-			
+			itemMenuSelecionado = "pedido";
 			request.setAttribute("itemMenuSelecionado", itemMenuSelecionado);
 			List<Venda> vendas = new ArrayList<Venda>();
 			if(nota == null) {
