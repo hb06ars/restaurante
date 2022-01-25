@@ -59,9 +59,9 @@
 
 <form action="/home" method="post">
     <!-- Begin page content -->
-    <main class="flex-shrink-0 main has-footer">
+    <main style="background-position: center;background-repeat: no-repeat; background-color:white; background-image: url('/img/fundo.png');" class="flex-shrink-0 main has-footer">
         <!-- Fixed navbar -->       
-        	<div class="container h-100 text-white">
+        	<div class="container h-100 text-dark">
 	            <div class="row h-100">
 	                <div class="col-12 align-self-center mb-4">
 	                    <div class="row justify-content-center">
@@ -69,12 +69,12 @@
 	                            <h2 class="font-weight-normal mb-1">Controle</h2>
 	                            <h4 class="font-weight-normal mb-5">Gerenciador de Serviços</h4>
 	                            <div class="form-group float-label">
-	                                <input type="text" name="usuarioVal" id="usuarioVal" class="form-control text-white" required>
-	                                <label class="form-control-label text-white">Nome de usuário</label>
+	                                <input type="text" name="usuarioVal" id="usuarioVal" class="form-control text-dark" required>
+	                                <label class="form-control-label text-dark">Nome de usuário</label>
 	                            </div>
 	                            <div class="form-group float-label position-relative">
-	                                <input type="password" name="senhaVal" class="form-control text-white" required>
-	                                <label class="form-control-label text-white">Senha</label>
+	                                <input type="password" name="senhaVal" class="form-control text-dark" required>
+	                                <label class="form-control-label text-dark">Senha</label>
 	                            </div>  
 	                        </div>
 	                    </div>
