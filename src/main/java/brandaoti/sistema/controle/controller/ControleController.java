@@ -165,9 +165,9 @@ public class ControleController extends HttpServlet {
 			u.setAtivo(true);
 			u.setTelefone("(11)98937-6271");
 			u.setPerfil(perfilDao.buscarAdm().get(0));
-			u.setLogin("hb06ars");
+			u.setLogin("adm");
 			u.setNome("Henrique Brandão");
-			u.setSenha("kzdut");
+			u.setSenha("adm");
 			usuarioDao.save(u);
 		}
 		
